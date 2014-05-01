@@ -1,0 +1,4 @@
+app_LiderResultado.php
+SISTEMA
+app_LiderResultado
+NAO
