@@ -1,0 +1,4 @@
+app_Competencias.php
+SISTEMA
+app_Competencias
+NAO
