@@ -1,0 +1,269 @@
+/******************************************************************************/
+/****                              Generators                              ****/
+/******************************************************************************/
+
+CREATE GENERATOR GEN_ID_COMPETENCIAS;
+SET GENERATOR GEN_ID_COMPETENCIAS TO 4;
+
+CREATE GENERATOR GEN_ID_DESEMPENHO;
+SET GENERATOR GEN_ID_DESEMPENHO TO 4320;
+
+CREATE GENERATOR GEN_ID_ETAPAS;
+SET GENERATOR GEN_ID_ETAPAS TO 10;
+
+CREATE GENERATOR GEN_ID_FUNCOES;
+SET GENERATOR GEN_ID_FUNCOES TO 3;
+
+CREATE GENERATOR GEN_ID_GRUPOS;
+SET GENERATOR GEN_ID_GRUPOS TO 2;
+
+CREATE GENERATOR GEN_ID_HABILIDADES;
+SET GENERATOR GEN_ID_HABILIDADES TO 18;
+
+CREATE GENERATOR GEN_ID_PARTICIPANTES;
+SET GENERATOR GEN_ID_PARTICIPANTES TO 16;
+
+CREATE GENERATOR GEN_ID_SETUP;
+SET GENERATOR GEN_ID_SETUP TO 20;
+
+CREATE GENERATOR GEN_ID_TURMAS;
+SET GENERATOR GEN_ID_TURMAS TO 1;
+
+
+
+/******************************************************************************/
+/****                                Tables                                ****/
+/******************************************************************************/
+
+
+
+CREATE TABLE COMPETENCIAS (
+    ID_COMPETENCIA   INTEGER NOT NULL,
+    COD_COMPETENCIA  VARCHAR(20) NOT NULL,
+    DESCRICAO        VARCHAR(120) NOT NULL,
+    OBS              VARCHAR(250)
+);
+
+CREATE TABLE DESEMPENHO (
+    ID_DESEMP       INTEGER NOT NULL,
+    COD_DESEMP      VARCHAR(30) NOT NULL,
+    ID_TURMA        INTEGER NOT NULL,
+    ID_GRUPO        INTEGER NOT NULL,
+    ID_VOTANTE      INTEGER NOT NULL,
+    ID_VOTADO       INTEGER NOT NULL,
+    ID_ETAPA        INTEGER NOT NULL,
+    ID_COMPETENCIA  INTEGER NOT NULL,
+    ID_HABILIDADE   INTEGER NOT NULL,
+    NOTA            NUMERIC(3,2),
+    PESO            NUMERIC(3,2),
+    RESULTADO       NUMERIC(4,2)
+);
+
+CREATE TABLE ETAPAS (
+    ID_ETAPA   INTEGER NOT NULL,
+    COD_ETAPA  VARCHAR(20) NOT NULL,
+    DESCRICAO  VARCHAR(120) NOT NULL,
+    OBS        VARCHAR(250)
+);
+
+CREATE TABLE FUNCOES (
+    ID_FUNCAO   INTEGER NOT NULL,
+    COD_FUNCAO  VARCHAR(20) NOT NULL,
+    DESCRICAO   VARCHAR(120) NOT NULL,
+    OBS         VARCHAR(250)
+);
+
+CREATE TABLE GRUPOS (
+    ID_TURMA   INTEGER NOT NULL,
+    ID_GRUPO   INTEGER NOT NULL,
+    COD_GRUPO  VARCHAR(20) NOT NULL,
+    DESCRICAO  VARCHAR(120) NOT NULL,
+    OBS        VARCHAR(250)
+);
+
+CREATE TABLE HABILIDADES (
+    ID_COMPETENCIA  INTEGER NOT NULL,
+    ID_HABILIDADE   INTEGER NOT NULL,
+    COD_HABILIDADE  VARCHAR(60) NOT NULL,
+    PESO            NUMERIC(2,2),
+    DESCRICAO       VARCHAR(150) NOT NULL,
+    OBS             VARCHAR(900)
+);
+
+CREATE TABLE PARTICIPANTES (
+    ID_GRUPO      INTEGER NOT NULL,
+    ID_PARTICIPE  INTEGER NOT NULL,
+    NOME          VARCHAR(20) NOT NULL,
+    SOBRENOME     VARCHAR(120) NOT NULL,
+    ESTADO        VARCHAR(30),
+    CIDADE        VARCHAR(35),
+    BAIRRO        VARCHAR(25),
+    LOGRADOURO    VARCHAR(200),
+    NUMERO        VARCHAR(6),
+    COMPLEMENTO   VARCHAR(50),
+    CEP           VARCHAR(20),
+    EMAIL         VARCHAR(50),
+    TELEFAX       VARCHAR(40),
+    TEL           VARCHAR(40),
+    OBS           VARCHAR(250)
+);
+
+CREATE TABLE SETUP (
+    ID_SETUP        INTEGER NOT NULL,
+    COD_SETUP       VARCHAR(30) NOT NULL,
+    ID_MENTOR       INTEGER,
+    ID_TURMA        INTEGER NOT NULL,
+    ID_GRUPO        INTEGER NOT NULL,
+    ID_ETAPA        INTEGER NOT NULL,
+    ID_LIDER        INTEGER NOT NULL,
+    ID_COMPETENCIA  INTEGER
+);
+
+CREATE TABLE TURMAS (
+    ID_TURMA     INTEGER NOT NULL,
+    COD_TURMA    VARCHAR(20) NOT NULL,
+    DESCRICAO    VARCHAR(120) NOT NULL,
+    ESTADO       VARCHAR(30),
+    CIDADE       VARCHAR(35),
+    BAIRRO       VARCHAR(25),
+    LOGRADOURO   VARCHAR(200),
+    NUMERO       VARCHAR(6),
+    COMPLEMENTO  VARCHAR(50),
+    CEP          VARCHAR(20),
+    EMAIL        VARCHAR(50),
+    TELEFAX      VARCHAR(40),
+    TEL          VARCHAR(40),
+    OBS          VARCHAR(250)
+);
+
+
+
+/******************************************************************************/
+/****                             Primary Keys                             ****/
+/******************************************************************************/
+
+ALTER TABLE COMPETENCIAS ADD CONSTRAINT PK_COMPETENCIAS PRIMARY KEY (ID_COMPETENCIA);
+ALTER TABLE DESEMPENHO ADD CONSTRAINT PK_DESEMP PRIMARY KEY (ID_DESEMP);
+ALTER TABLE ETAPAS ADD CONSTRAINT PK_ETAPAS PRIMARY KEY (ID_ETAPA);
+ALTER TABLE FUNCOES ADD CONSTRAINT PK_FUNCOES PRIMARY KEY (ID_FUNCAO);
+ALTER TABLE GRUPOS ADD CONSTRAINT PK_GRUPOS PRIMARY KEY (ID_GRUPO);
+ALTER TABLE HABILIDADES ADD CONSTRAINT PK_HABILIDADES PRIMARY KEY (ID_HABILIDADE);
+ALTER TABLE PARTICIPANTES ADD CONSTRAINT PK_PARTICIPANTES PRIMARY KEY (ID_PARTICIPE);
+ALTER TABLE TURMAS ADD CONSTRAINT PK_TURMAS PRIMARY KEY (ID_TURMA);
+
+
+/******************************************************************************/
+/****                             Foreign Keys                             ****/
+/******************************************************************************/
+
+ALTER TABLE GRUPOS ADD CONSTRAINT FK_GRUPOS_TURMAS FOREIGN KEY (ID_TURMA) REFERENCES TURMAS (ID_TURMA) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE HABILIDADES ADD CONSTRAINT FK_COMPETENCIA_HABILIDADE FOREIGN KEY (ID_COMPETENCIA) REFERENCES COMPETENCIAS (ID_COMPETENCIA) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE PARTICIPANTES ADD CONSTRAINT FK_PARTICIPANTES_GRUPOS FOREIGN KEY (ID_GRUPO) REFERENCES GRUPOS (ID_GRUPO) ON DELETE CASCADE ON UPDATE CASCADE;
+
+
+/******************************************************************************/
+/****                               Triggers                               ****/
+/******************************************************************************/
+
+
+SET TERM ^ ;
+
+
+/******************************************************************************/
+/****                         Triggers for tables                          ****/
+/******************************************************************************/
+
+
+
+/* Trigger: ID_COMPETENCIAS_BI */
+CREATE TRIGGER ID_COMPETENCIAS_BI FOR COMPETENCIAS
+ACTIVE BEFORE INSERT POSITION 0
+as
+begin
+  if (new.ID_COMPETENCIA is null or new.ID_COMPETENCIA = 0) then
+    new.ID_COMPETENCIA = gen_id(GEN_ID_COMPETENCIAS,1);
+end
+^
+
+/* Trigger: ID_DESEMPENHO_BI */
+CREATE TRIGGER ID_DESEMPENHO_BI FOR DESEMPENHO
+ACTIVE BEFORE INSERT POSITION 0
+as
+begin
+  if (new.ID_DESEMP is null or new.ID_DESEMP = 0) then
+    new.ID_DESEMP = gen_id(GEN_ID_DESEMPENHO,1);
+end
+^
+
+/* Trigger: ID_ETAPAS_BI */
+CREATE TRIGGER ID_ETAPAS_BI FOR ETAPAS
+ACTIVE BEFORE INSERT POSITION 0
+as
+begin
+  if (new.ID_ETAPA is null or new.ID_ETAPA = 0) then
+    new.ID_ETAPA = gen_id(GEN_ID_ETAPAS,1);
+end
+^
+
+/* Trigger: ID_FUNCOES_BI */
+CREATE TRIGGER ID_FUNCOES_BI FOR FUNCOES
+ACTIVE BEFORE INSERT POSITION 0
+as
+begin
+  if (new.ID_FUNCAO is null or new.ID_FUNCAO = 0) then
+    new.ID_FUNCAO = gen_id(GEN_ID_FUNCOES,1);
+end
+^
+
+/* Trigger: ID_GRUPOS_BI */
+CREATE TRIGGER ID_GRUPOS_BI FOR GRUPOS
+ACTIVE BEFORE INSERT POSITION 0
+as
+begin
+  if (new.ID_GRUPO is null or new.ID_GRUPO = 0) then
+    new.ID_GRUPO = gen_id(GEN_ID_GRUPOS,1);
+end
+^
+
+/* Trigger: ID_HABILIDADES_BI */
+CREATE TRIGGER ID_HABILIDADES_BI FOR HABILIDADES
+ACTIVE BEFORE INSERT POSITION 0
+as
+begin
+  if (new.ID_HABILIDADE is null or new.ID_HABILIDADE = 0) then
+    new.ID_HABILIDADE = gen_id(GEN_ID_HABILIDADES,1);
+end
+^
+
+/* Trigger: ID_PARTICIPANTES_BI */
+CREATE TRIGGER ID_PARTICIPANTES_BI FOR PARTICIPANTES
+ACTIVE BEFORE INSERT POSITION 0
+as
+begin
+  if (new.ID_PARTICIPE is null or new.ID_PARTICIPE = 0)then
+    new.ID_PARTICIPE = gen_id(GEN_ID_PARTICIPANTES,1);
+end
+^
+
+/* Trigger: ID_SETUP_BI */
+CREATE TRIGGER ID_SETUP_BI FOR SETUP
+ACTIVE BEFORE INSERT POSITION 0
+as
+begin
+  if (new.ID_SETUP is null or new.ID_SETUP = 0) then
+    new.ID_SETUP = gen_id(GEN_ID_SETUP,1);
+end
+^
+
+/* Trigger: ID_TURMAS_BI */
+CREATE TRIGGER ID_TURMAS_BI FOR TURMAS
+ACTIVE BEFORE INSERT POSITION 0
+as
+begin
+  if (new.ID_TURMA is null or new.ID_TURMA = 0) then
+    new.ID_TURMA = gen_id(GEN_ID_TURMAS,1);
+end
+^
+
+SET TERM ; ^
+
