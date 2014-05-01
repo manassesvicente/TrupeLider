@@ -1,0 +1,4 @@
+app_Funcoes.php
+SISTEMA
+app_Funcoes
+NAO
